@@ -1,10 +1,9 @@
-import Counter from './components/Counter';
-import './App.scss';
+import MainRouter from './routes/MainRouter';
 
 function App() {
   return (
-    <div className="App">
-      <Counter />      
+    <div>
+      <MainRouter />
     </div>
   );
 }

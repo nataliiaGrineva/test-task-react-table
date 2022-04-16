@@ -1,2 +1,3 @@
-export const ADD = 'ADD';
-export const SUBTRACT = 'SUBTRACT';
+export const GET_REGIONS_DATA = 'GET_REGIONS_DATA';
+export const GET_COMMENTS_DATA = 'GET_COMMENTS_DATA';
+export const ADD_COMMENT = 'ADD_COMMENT';
