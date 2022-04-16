@@ -94,8 +94,6 @@ const UsersTable = () => {
     setValue('');
   };
 
-  console.log('comments', comments);
-
   return (
     <Paper className={classes.root}>
       <Table className={classes.table} aria-label='users comments table'>
