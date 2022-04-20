@@ -30,7 +30,7 @@ const RegionsTable = () => {
   }, [dispatch]);
 
   const [years, setYears] = useState([]);
-
+  const [headers, setHeaders] = useState([]);
   const computeYearsFromJson = () => {
     if (regionsData) {
       let newYears = [];
@@ -47,32 +47,64 @@ const RegionsTable = () => {
 
       return newYears;
     }
+
+    return [];
   };
 
+  const computeHeadersFromJson = () => {
+    if (regionsData) {
+      let newheaders = [];
+
+      const headersFromJson = Object.entries(regionsData)
+        .map((item) => Object.entries(item[1].G))
+        .map((item) => Object.entries(item[1]))
+        .map((item) => Object.keys(item[1][1]))
+        .reduce((prev, current) => [...prev, ...current], []);
+
+      headersFromJson.forEach((el) => {
+        if (newheaders.includes(el)) return;
+        newheaders.push(el);
+      });
+      return newheaders;
+    }
+
+    return [];
+  };
+
+  const preparedHeaders = useMemo(computeHeadersFromJson, [regionsData]);
   const preparedYears = useMemo(computeYearsFromJson, [regionsData]);
 
   useEffect(() => {
     setYears(preparedYears);
   }, [preparedYears]);
 
-  const regionHeading = ['XX', 'YY', 'ZZ', 'WW'];
+  useEffect(() => {
+    setHeaders(preparedHeaders);
+  }, [preparedHeaders]);
 
   function createData(regions, ...rest) {
     return { regions, ...rest };
   }
 
   let rows = [];
-  if (regionsData && years) {
+  if (regionsData && years && headers) {
     rows = Object.entries(regionsData).map((item) => {
       const reg = item[0];
 
       const temp = years.map((el) => {
-        const x = item[1].G[el]?.XX.value === undefined ? '' : item[1].G[el]?.XX.value;
-        const y = item[1].G[el]?.YY.value === undefined ? '' : item[1].G[el]?.YY.value;
-        const z = item[1].G[el]?.ZZ.value === undefined ? '' : item[1].G[el]?.ZZ.value;
-        const w = y === '' || z === '' ? '' : y * z;
+        const data = headers.map((head) => {
+          if (item[1].G[el]?.[head].value === undefined) {
+            return '';
+          } else {
+            return item[1].G[el]?.[head].value;
+          }
+        });
+        const ww =
+          item[1].G[el]?.YY.value === undefined || item[1].G[el]?.ZZ.value === undefined
+            ? ''
+            : item[1].G[el]?.YY.value * item[1].G[el]?.ZZ.value;
 
-        return [x, y, z, w];
+        return [...data, ww];
       });
 
       const dataRowTemp = temp.reduce((prev, current) => [...prev, ...current], []);
@@ -80,6 +112,8 @@ const RegionsTable = () => {
       return createData(reg, ...dataRowTemp);
     });
   }
+
+  const regionHeading = [...headers, 'WW'];
 
   const handleOpenPopup = (e, item, row, index) => {
     const column = regionHeading[index % regionHeading.length];
