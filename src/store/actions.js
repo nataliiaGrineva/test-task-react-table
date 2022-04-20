@@ -1,4 +1,4 @@
-import { GET_REGIONS_DATA, GET_COMMENTS_DATA, ADD_COMMENT } from './types';
+import { GET_REGIONS_DATA, GET_COMMENTS_DATA, ADD_COMMENT, EDIT_VALUE } from './types';
 import data from '../assets/testData.txt';
 
 export const getRegionsData = (data) => ({ type: GET_REGIONS_DATA, payload: data });
@@ -21,3 +21,5 @@ export const getData = () => async (dispatch) => {
     console.warn(error);
   }
 };
+
+export const editValue = (info) => ({ type: EDIT_VALUE, payload: info });

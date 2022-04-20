@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getData } from '../../store/actions';
+import { editValue, getData } from '../../store/actions';
 
 import { makeStyles } from '@mui/styles';
 import Table from '@mui/material/Table';
@@ -55,7 +55,7 @@ const RegionsTable = () => {
     setYears(preparedYears);
   }, [preparedYears]);
 
-  const regionHeading = ['XX', 'YY', 'ZZ'];
+  const regionHeading = ['XX', 'YY', 'ZZ', 'WW'];
 
   function createData(regions, ...rest) {
     return { regions, ...rest };
@@ -70,8 +70,9 @@ const RegionsTable = () => {
         const x = item[1].G[el]?.XX.value === undefined ? '' : item[1].G[el]?.XX.value;
         const y = item[1].G[el]?.YY.value === undefined ? '' : item[1].G[el]?.YY.value;
         const z = item[1].G[el]?.ZZ.value === undefined ? '' : item[1].G[el]?.ZZ.value;
+        const w = y === '' || z === '' ? '' : y * z;
 
-        return [x, y, z];
+        return [x, y, z, w];
       });
 
       const dataRowTemp = temp.reduce((prev, current) => [...prev, ...current], []);
@@ -80,8 +81,24 @@ const RegionsTable = () => {
     });
   }
 
-  const handleOpenPopup = (item) => () => {
-    if (item[1]) {
+  const handleOpenPopup = (e, item, row, index) => {
+    const column = regionHeading[index % regionHeading.length];
+
+    if (item[1] && column !== 'WW') {
+      const region = row.find((el) => el[0] === 'regions')[1];
+      const year = years[Math.floor(index / regionHeading.length)];
+
+      window.openerCallback = function (newValue) {
+        dispatch(
+          editValue({
+            region,
+            year,
+            column,
+            value: newValue
+          })
+        );
+      };
+      window.cellValue = item[1];
       window.open('#/popup');
     }
   };
@@ -93,7 +110,7 @@ const RegionsTable = () => {
           <TableRow>
             <TableCell />
             {years?.map((year) => (
-              <TableCell align='center' colSpan={3} key={year}>
+              <TableCell align='center' colSpan={4} key={year}>
                 {year}
               </TableCell>
             ))}
@@ -115,13 +132,13 @@ const RegionsTable = () => {
               <TableCell component='td' scope='row'>
                 {row.regions}
               </TableCell>
-              {Object.entries(row).map((item, index) => {
+              {Object.entries(row).map((item, index, row) => {
                 if (item[0] === 'regions') return null;
                 return (
                   <TableCell
                     align='center'
                     key={`${row.regions}${index}`}
-                    onClick={handleOpenPopup(item)}
+                    onClick={(e) => handleOpenPopup(e, item, row, index)}
                     sx={{ cursor: 'pointer' }}>
                     {item[1]}
                   </TableCell>

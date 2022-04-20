@@ -5,7 +5,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,7 +21,8 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-evenly'
+    justifyContent: 'space-evenly',
+    marginBottom: 20
   },
   table: {
     minWidth: 400,
@@ -45,6 +46,8 @@ const UsersTable = () => {
   const [value, setValue] = useState('');
   const [comment, setComment] = useState('');
   const [date] = useState(getCurrentDate());
+
+  const [cellValue, setCellValue] = useState(window.opener.cellValue || '');
 
   const { comments } = useSelector((store) => store);
 
@@ -71,7 +74,23 @@ const UsersTable = () => {
 
   const handleComment = ({ target }) => setComment(target.value);
 
-  const closeWindow = () => window.close();
+  const closeWindow = () => {
+    window.close();
+  };
+
+  const handleChangeValue = ({ target }) => {
+    setCellValue(
+      target.value
+        .replace(/[^\d]/g, '')
+        .replace(/^0+/g, '0')
+        .replace(/^0(?=\d)/g, '')
+        .slice(0, 10)
+    );
+  };
+
+  const handleNewValue = () => {
+    window.opener.openerCallback(+cellValue);
+  };
 
   const handleNewComment = () => {
     const newUser = currentUser || 'Anonymous';
@@ -95,74 +114,95 @@ const UsersTable = () => {
   };
 
   return (
-    <Paper className={classes.root}>
-      <Table className={classes.table} aria-label='users comments table'>
-        <TableHead>
-          <TableRow>
-            {headings.map((heading) => (
-              <TableCell key={heading} align='center'>
-                {heading}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              {Object.entries(row).map((value) => {
-                if (value[0] === 'id') return null;
-                return (
-                  <TableCell key={`${row.id}${value[1]}`} component='td' align='center'>
-                    {value[1]}
-                  </TableCell>
-                );
-              })}
+    <Box>
+      <Paper className={classes.root}>
+        <Table className={classes.table} aria-label='users comments table'>
+          <TableHead>
+            <TableRow>
+              {headings.map((heading) => (
+                <TableCell key={heading} align='center'>
+                  {heading}
+                </TableCell>
+              ))}
             </TableRow>
-          ))}
-          <TableRow>
-            <TableCell>
-              <TextField label='Value' variant='outlined' value={value} onChange={handleValue} />
-            </TableCell>
-            <TableCell>
-              <FormControl fullWidth>
-                <InputLabel id='demo-simple-select-label'>User</InputLabel>
-                <Select sx={{ width: 120 }} value={currentUser} label='User' onChange={handleUser}>
-                  {users.map((user) => (
-                    <MenuItem value={user} key={user}>
-                      {user}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </TableCell>
-            <TableCell>{date}</TableCell>
-            <TableCell>
-              <TextField
-                label='Comment'
-                variant='outlined'
-                value={comment}
-                onChange={handleComment}
-              />
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-      <Button
-        className={classes.button}
-        variant='contained'
-        color='primary'
-        onClick={handleNewComment}>
-        ADD
-      </Button>
-      <Button
-        size='large'
-        className={classes.button}
-        variant='contained'
-        color='error'
-        onClick={closeWindow}>
-        CLOSE
-      </Button>
-    </Paper>
+          </TableHead>
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow key={row.id}>
+                {Object.entries(row).map((value) => {
+                  if (value[0] === 'id') return null;
+                  return (
+                    <TableCell key={`${row.id}${value[1]}`} component='td' align='center'>
+                      {value[1]}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))}
+            <TableRow>
+              <TableCell>
+                <TextField label='Value' variant='outlined' value={value} onChange={handleValue} />
+              </TableCell>
+              <TableCell>
+                <FormControl fullWidth>
+                  <InputLabel id='demo-simple-select-label'>User</InputLabel>
+                  <Select
+                    sx={{ width: 120 }}
+                    value={currentUser}
+                    label='User'
+                    onChange={handleUser}>
+                    {users.map((user) => (
+                      <MenuItem value={user} key={user}>
+                        {user}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </TableCell>
+              <TableCell>{date}</TableCell>
+              <TableCell>
+                <TextField
+                  label='Comment'
+                  variant='outlined'
+                  value={comment}
+                  onChange={handleComment}
+                />
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+        <Button
+          className={classes.button}
+          variant='contained'
+          color='primary'
+          onClick={handleNewComment}>
+          ADD
+        </Button>
+        <Button
+          size='large'
+          className={classes.button}
+          variant='contained'
+          color='error'
+          onClick={closeWindow}>
+          CLOSE
+        </Button>
+      </Paper>
+      <Paper className={classes.root}>
+        <TextField
+          label='change field'
+          variant='outlined'
+          value={cellValue}
+          onChange={handleChangeValue}
+        />
+        <Button
+          className={classes.button}
+          variant='contained'
+          color='primary'
+          onClick={handleNewValue}>
+          Save value
+        </Button>
+      </Paper>
+    </Box>
   );
 };
 
